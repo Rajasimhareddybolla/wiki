@@ -11,10 +11,11 @@ class file(forms.Form):
     text_area = forms.CharField(max_length=5000)
 class editf (forms.Form):
     name = ""
-    def mode(self,nam):
-        self.name = nam
-    content =  forms.CharField(initial=name) 
-
+    def __init__(self, *args, **kwargs):
+        
+        super(editf, self).__init__(*args, **kwargs)
+        self.fields['content'] = forms.CharField(initial="intial content")
+ 
 def index(request):
     if request.method=="POST":
         pass
@@ -66,10 +67,8 @@ def edit(request,name="edit"):
             util.save_entry(name,conten)
             return index(request)
     content = util.get_entry(name)
-    e = editf()
-    e.mode(content)
     return render(request,"encyclopedia/edit.html",{
-        "feild":e,
+        "feild":editf,
         "name" :name,
         "content":content
     })
