@@ -9,6 +9,11 @@ class search(forms.Form):
 class file(forms.Form):
     file_name = forms.CharField(max_length=255)
     text_area = forms.CharField(max_length=5000)
+class editf (forms.Form):
+    name = ""
+    def mode(self,nam):
+        self.name = nam
+    content =  forms.CharField(initial=name) 
 
 def index(request):
     if request.method=="POST":
@@ -27,11 +32,11 @@ def show(request,name="search"):
     if name.capitalize() in util.list_entries():
         about = util.get_entry(name)
         html = markdown.markdown(about)
+        html+=f"<br><form action='edit/{name}'><input type='submit' class='search'></form>"
         return HttpResponse(html)
     else:
         match_case = []
         for entry in util.list_entries():
-            print(entry,name.capitalize())
             if entry.find(name.lower()) != -1:
                 match_case.append(entry)
         return render(request,"encyclopedia/match.html",{
@@ -40,7 +45,6 @@ def show(request,name="search"):
 def random(request):
     names = util.list_entries()
     entry = names[randint(0,len(names))]
-    print(entry)
     return show(request,entry)
 def new(request):
     if request.method == "POST":
@@ -54,3 +58,18 @@ def new(request):
         return render(request,"encyclopedia/add.html",{
             "feild":file,
         })
+def edit(request,name="edit"):
+    if request.method == "POST":
+        form = editf(request.POST)
+        if form.is_valid():
+            conten = form.cleaned_data["content"]
+            util.save_entry(name,conten)
+            return index(request)
+    content = util.get_entry(name)
+    e = editf()
+    e.mode(content)
+    return render(request,"encyclopedia/edit.html",{
+        "feild":e,
+        "name" :name,
+        "content":content
+    })
